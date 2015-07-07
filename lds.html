@@ -1,0 +1,353 @@
+<!DOCTYPE html><html>
+ <head>
+  <meta charset="utf-8">
+  </meta>
+  <title>
+   LargeDS is a set of JS Typed Arrays based Data Strcutures for memory intesive tasks
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </meta>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  </meta>
+  <link href="http://fonts.googleapis.com/css?family=Raleway:400,100,200,300,500,600,700,800,900" rel="stylesheet" type="text/css">
+  </link>
+  <link href="lib/skeleton/css/skeleton.css" rel="stylesheet">
+  </link>
+  <link href="lib/highlightjs/styles/default.css" rel="stylesheet">
+  </link>
+  <link href="css/style.css" rel="stylesheet">
+  </link>
+  <link href="blog.css" rel="stylesheet">
+  </link>
+  <script>
+   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-63286859-1', 'auto');
+          ga('send', 'pageview');
+
+  </script>
+ </head>
+ <body>
+  <div class="container wallapatta-container ">
+   <div class="header ">
+    <h1>
+     <a href="index.html">
+      CHETHIYA ABEYSINGHE
+     </a>
+    </h1>
+    <a class="button " href="https://www.twitter.com/chethiyaa">
+     @chethiyaa
+    </a>
+   </div>
+   <div class="wallapatta ">
+    <h1 class="title ">
+     LargeDS is a set of JS Typed Arrays based Data Strcutures for memory intesive tasks
+    </h1>
+    <h3 class="date ">
+     July 07, 2015
+    </h3>
+    <div class="row ">
+     <div class="wallapatta-main nine columns ">
+      <div id="wallapatta_0" class="article"><div id="wallapatta_1" class="section"><h3 class="heading"><span id="wallapatta_2" class="block"><span id="wallapatta_111" class="text">The Problem</span></span></h3><div class="content"><div id="wallapatta_3" class="section"><div class="content"><p id="wallapatta_4" class="paragraph"><span id="wallapatta_112" class="text">I use CoffeeScript (Node.js) extensively to analyze large data sets. Time to time I run out of available memory provided by v8 for JS Objects and Arrays. Even in 64-bit Node.js (as of version 0.12) there is ~1.5GB memory limit. But this memory limit does not apply for Types Arrays. I don't believe this is case where we need to look for another resort like C, specially given the flexibility offered by JavaScript.</span></p></div></div></div></div><div id="wallapatta_8" class="section"><h3 class="heading"><span id="wallapatta_9" class="block"><span id="wallapatta_114" class="text">What is LDS</span></span></h3><div class="content"><div id="wallapatta_10" class="section"><div class="content"><p id="wallapatta_11" class="paragraph"><a id="wallapatta_115" class="link" href="https://github.com/chethiya/lds">LDS</a><span id="wallapatta_116" class="text"> (Large Data Structures) is a library that implements some of basic data structure based on JavaScript Typed Arrays to overcome this memory limit issue. It's still not fine tuned to gain the best performance but very much usable. There can be considerable performance hit in when it comes to strings since the lack of support from JS API to convert between JS String and Buffers</span></p></div></div><div id="wallapatta_15" class="section"><div class="content"><p id="wallapatta_16" class="paragraph"><span id="wallapatta_119" class="text">Here's how to use LDS to implement </span><code id="wallapatta_120" class="code"><span id="wallapatta_121" class="text">&lt;string,number&gt;</span></code><span id="wallapatta_122" class="text"> map in Coffescript.</span></p></div></div><pre id="wallapatta_20" class="codeBlock"><code class="coffeescript">LDS = <span class="hljs-built_in">require</span> <span class="hljs-string">'lds'</span>
+n = <span class="hljs-number">10000000</span>
+map = LDS.HashtableBase n, LDS.Types.Int32
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..n]
+ map.set <span class="hljs-string">"<span class="hljs-subst">#{i}</span>"</span>, i
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>.<span class="hljs-number">10</span>]
+ <span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{i}</span> -&gt; <span class="hljs-subst">#{map.get <span class="hljs-string">"<span class="hljs-subst">#{i}</span>"</span>}</span>"</span></code></pre></div></div><div id="wallapatta_21" class="section"><h3 class="heading"><span id="wallapatta_22" class="block"><span id="wallapatta_124" class="text">How to get it</span></span></h3><div class="content"><div id="wallapatta_23" class="section"><h4 class="heading"><span id="wallapatta_24" class="block"><span id="wallapatta_125" class="text">Node.js</span></span></h4><div class="content"><pre id="wallapatta_25" class="codeBlock"><code class="nohighlight">npm install lds</code></pre><div id="wallapatta_26" class="section"><div class="content"><p id="wallapatta_27" class="paragraph"><span id="wallapatta_126" class="text">And require it as follows</span></p></div></div><pre id="wallapatta_28" class="codeBlock"><code class="javascript">LDS = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lds'</span>)</code></pre></div></div><div id="wallapatta_29" class="section"><h4 class="heading"><span id="wallapatta_30" class="block"><span id="wallapatta_127" class="text">Browser</span></span></h4><div class="content"><pre id="wallapatta_31" class="codeBlock"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"https://github.com/chethiya/lds/blob/master/build/lds.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span></code></pre><div id="wallapatta_32" class="section"><div class="content"><p id="wallapatta_33" class="paragraph"><span id="wallapatta_128" class="text">And consume it as follows</span></p></div></div><pre id="wallapatta_34" class="codeBlock"><code class="javascript">LDS = <span class="hljs-built_in">window</span>.LDS</code></pre></div></div></div></div><div id="wallapatta_35" class="section"><h3 class="heading"><span id="wallapatta_36" class="block"><span id="wallapatta_129" class="text">Struct</span></span></h3><div class="content"><div id="wallapatta_37" class="section"><div class="content"><p id="wallapatta_38" class="paragraph"><span id="wallapatta_130" class="text">To represent related values, LDS has an implementation of Struct. A struct definition contains a list of root level property names and the types. Supported types are:</span></p></div></div><pre id="wallapatta_39" class="codeBlock"><code class="nohighlight">UInt8
+UInt32
+UInt16
+Float32
+Float64
+String</code></pre><div id="wallapatta_43" class="section"><div class="content"><p id="wallapatta_44" class="paragraph"><span id="wallapatta_132" class="text">Here's an example definition of Struct</span></p></div></div><pre id="wallapatta_45" class="codeBlock"><code class="coffeescript">Person = LDS.Struct <span class="hljs-string">"Person"</span>,
+ {<span class="hljs-attribute">property</span>: <span class="hljs-string">'name'</span>, <span class="hljs-attribute">type</span>: LDS.Types.String, <span class="hljs-attribute">length</span>: <span class="hljs-number">1</span>}
+ {<span class="hljs-attribute">property</span>: <span class="hljs-string">'age'</span>, <span class="hljs-attribute">type</span>: LDS.Types.Int16}
+ {<span class="hljs-attribute">property</span>: <span class="hljs-string">'values'</span>, <span class="hljs-attribute">type</span>: LDS.Types.Int32, <span class="hljs-attribute">length</span>: <span class="hljs-number">5</span>}
+ {<span class="hljs-attribute">property</span>: <span class="hljs-string">'address'</span>, <span class="hljs-attribute">type</span>: LDS.Types.String, <span class="hljs-attribute">length</span>: <span class="hljs-number">5</span>}</code></pre><ul id="wallapatta_46" class="list"><li id="wallapatta_47" class="list-item"><span id="wallapatta_48" class="block"><span id="wallapatta_133" class="text">property 'name' is a String</span></span></li><li id="wallapatta_49" class="list-item"><span id="wallapatta_50" class="block"><span id="wallapatta_134" class="text">property 'age' is a 16-bit integer</span></span></li><li id="wallapatta_51" class="list-item"><span id="wallapatta_52" class="block"><span id="wallapatta_135" class="text">property 'values' is a fixed-length array of 32-bit integer</span></span></li><li id="wallapatta_53" class="list-item"><span id="wallapatta_54" class="block"><span id="wallapatta_136" class="text">property 'address' is a fixed-length array of Strings</span></span></li></ul><pre id="wallapatta_55" class="codeBlock"><code class="coffeescript">p = <span class="hljs-keyword">new</span> Person
+p.setName <span class="hljs-string">'Bob'</span>
+p.setAge <span class="hljs-number">23</span>
+p.setValues [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]</code></pre><pre id="wallapatta_59" class="codeBlock"><code class="coffeescript">p.setAddress [<span class="hljs-string">"No. 123"</span>, <span class="hljs-string">"Street 1"</span>, <span class="hljs-string">"Street 2"</span>, <span class="hljs-string">""</span>]
+p.setAddress <span class="hljs-string">"index-3-new"</span>, <span class="hljs-number">3</span></code></pre><pre id="wallapatta_63" class="codeBlock"><code class="coffeescript">str = <span class="hljs-keyword">new</span> LDS.String <span class="hljs-string">"4-fourth"</span>
+p.setAddress str, <span class="hljs-number">4</span>, <span class="hljs-literal">on</span></code></pre><div id="wallapatta_67" class="section"><div class="content"><p id="wallapatta_68" class="paragraph"><span id="wallapatta_153" class="text">Can set LDS.String values instead of JS native Strings by setting the 3rd argument </span><code id="wallapatta_154" class="code"><span id="wallapatta_155" class="text">true</span></code><span id="wallapatta_156" class="text"> in all setter functions</span></p></div></div><pre id="wallapatta_69" class="codeBlock"><code class="coffeescript">str.release()</code></pre><div id="wallapatta_70" class="section"><div class="content"><p id="wallapatta_71" class="paragraph"><span id="wallapatta_157" class="text">If you are to create LDS.String, you must release those string objects by calling </span><code id="wallapatta_158" class="code"><span id="wallapatta_159" class="text">release()</span></code><span id="wallapatta_160" class="text"> method. In most cases you will not create LDS.Strings. But you might create Hashtables and ArrayLists having LDS.Strings in their Structs. In such cases you'll have to call </span><code id="wallapatta_161" class="code"><span id="wallapatta_162" class="text">release()</span></code><span id="wallapatta_163" class="text"> method of those objects once you are done working with that data structure.</span></p></div></div><pre id="wallapatta_72" class="codeBlock"><code class="coffeescript"><span class="hljs-built_in">console</span>.log p.get()</code></pre><pre id="wallapatta_76" class="codeBlock"><code class="coffeescript"><span class="hljs-built_in">console</span>.log p.getAddress <span class="hljs-number">2</span></code></pre><pre id="wallapatta_80" class="codeBlock"><code class="coffeescript">str = p.getAddress <span class="hljs-number">0</span>, <span class="hljs-literal">on</span>
+
+<span class="hljs-built_in">console</span>.log str.toString()
+str.release()
+
+p2 = <span class="hljs-keyword">new</span> Person
+p2.copyFrom p
+<span class="hljs-built_in">console</span>.log p2.get()</code></pre><div id="wallapatta_84" class="section"><div class="content"><p id="wallapatta_85" class="paragraph"><code id="wallapatta_173" class="code"><span id="wallapatta_174" class="text">Struct.copyFrom()</span></code><span id="wallapatta_175" class="text"> method copies the content from source struct buffer area to target struct buffer area. LDS.Strings are copied by reference.</span></p><ul id="wallapatta_86" class="list"><li id="wallapatta_87" class="list-item"><span id="wallapatta_88" class="block"><span id="wallapatta_176" class="text">Reference counts to existing strings in source are decremented by 1.</span></span></li><li id="wallapatta_89" class="list-item"><span id="wallapatta_90" class="block"><span id="wallapatta_177" class="text">Reference counts to strings in target are incremented by 1.</span></span></li></ul></div></div></div></div><div id="wallapatta_91" class="section"><h3 class="heading"><span id="wallapatta_92" class="block"><span id="wallapatta_178" class="text">Array List</span></span></h3><div class="content"><div id="wallapatta_93" class="section"><div class="content"><p id="wallapatta_94" class="paragraph"><span id="wallapatta_179" class="text">There is an implementation of LDS.Array. But LDS.Array hits a 32-bit limitation as size in </span><code id="wallapatta_180" class="code"><span id="wallapatta_181" class="text">new ArrayBuffer size</span></code><span id="wallapatta_182" class="text"> has to be somewhere around </span><code id="wallapatta_183" class="code"><span id="wallapatta_184" class="text">2^30</span></code><span id="wallapatta_185" class="text"> at max. Therefore LDS.Array has a maximum size limit of </span><code id="wallapatta_186" class="code"><span id="wallapatta_187" class="text">2^29 / (#bytes_per_strcut)</span></code></p></div></div><div id="wallapatta_95" class="section"><div class="content"><p id="wallapatta_96" class="paragraph"><span id="wallapatta_188" class="text">ArrayList is build on top of LDS.Array and it is a list of LDS.Arrays. Therefore it has a size limit much greater than </span><code id="wallapatta_189" class="code"><span id="wallapatta_190" class="text">2^32</span></code><span id="wallapatta_191" class="text">.</span></p></div></div><div id="wallapatta_97" class="section"><div class="content"><p id="wallapatta_98" class="paragraph"><span id="wallapatta_192" class="text">Here's hoe to make a large LDS.ArrayList using the </span><code id="wallapatta_193" class="code"><span id="wallapatta_194" class="text">sturct Person</span></code><span id="wallapatta_195" class="text">.</span></p></div></div><pre id="wallapatta_99" class="codeBlock"><code class="coffeescript"><span class="hljs-function"><span class="hljs-title">testArratList</span> = <span class="hljs-params">(n)</span> -&gt;</span>
+ arr = <span class="hljs-keyword">new</span> Array <span class="hljs-number">5</span>
+ people = <span class="hljs-keyword">new</span> LDS.ArrayList Person
+ instanece = <span class="hljs-literal">null</span>
+ <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..n]
+  instance = people.add instance <span class="hljs-comment"># same as people.add()</span>
+  instance.copyFrom p2
+  instance.setName <span class="hljs-string">"<span class="hljs-subst">#{i}</span>"</span>
+
+  <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-number">5</span>]
+   arr[j] = <span class="hljs-string">"<span class="hljs-subst">#{i}</span>-<span class="hljs-subst">#{j}</span>"</span> <span class="hljs-comment"># or instance.setAddress "#{i}-#{j}", j</span>
+  instance.setAddress arr
+ <span class="hljs-built_in">console</span>.log <span class="hljs-string">'Done pushing elements'</span>
+ <span class="hljs-built_in">console</span>.log <span class="hljs-string">'Reading from ArrayList'</span>
+ <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-number">10</span>]
+  p = (Math.floor Math.random()*n) % n
+  <span class="hljs-comment">#following is equal to (people.get p).getAddress()</span>
+  <span class="hljs-built_in">console</span>.log p, (people.get p, instance).getAddress()</code></pre></div></div><div id="wallapatta_103" class="section"><h3 class="heading"><span id="wallapatta_104" class="block"><span id="wallapatta_209" class="text">Hash Table</span></span></h3><div class="content"></div></div><div id="wallapatta_105" class="section"><div class="content"><p id="wallapatta_106" class="paragraph"><span id="wallapatta_210" class="text">LDS.HastableBase is a </span><code id="wallapatta_211" class="code"><span id="wallapatta_212" class="text">&lt;string,number&gt;</span></code><span id="wallapatta_213" class="text"> implementation. LDS.Hashtable is a more generic </span><code id="wallapatta_214" class="code"><span id="wallapatta_215" class="text">&lt;string,LDS.Struct&gt;</span></code><span id="wallapatta_216" class="text"> hashtable that is based on LDS.HashtableBase.</span></p></div></div><pre id="wallapatta_107" class="codeBlock"><code class="coffeescript"><span class="hljs-function"><span class="hljs-title">testHashtable</span> = <span class="hljs-params">(n)</span> -&gt;</span>
+ <span class="hljs-built_in">console</span>.time <span class="hljs-string">'time_hashtable'</span>
+ arr = <span class="hljs-keyword">new</span> Array <span class="hljs-number">5</span>
+ people = LDS.Hashtable n, Person <span class="hljs-comment">#creates a hashtable of size n</span>
+ instance = <span class="hljs-literal">null</span>
+ <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..n]
+  instance = people.get <span class="hljs-string">"<span class="hljs-subst">#{i}</span>"</span>, instance <span class="hljs-comment">#gets the value in key #{i}</span>
+  instance.copyFrom p2
+
+  <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-number">5</span>]
+   instance.setAddress <span class="hljs-string">"<span class="hljs-subst">#{i}</span>-<span class="hljs-subst">#{j}</span>"</span>, j
+ <span class="hljs-built_in">console</span>.timeEnd <span class="hljs-string">'time_hashtable'</span>
+ <span class="hljs-built_in">console</span>.log <span class="hljs-string">'Done populating the hastable'</span>
+ <span class="hljs-built_in">console</span>.log <span class="hljs-string">'Reading from hashtable'</span>
+
+ <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..<span class="hljs-number">20</span>]
+  p = (Math.floor Math.random()*n*<span class="hljs-number">2</span>) % (<span class="hljs-number">2</span>*n)
+  <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> people.check <span class="hljs-string">"<span class="hljs-subst">#{p}</span>"</span> <span class="hljs-comment">#checks whether key exists</span>
+   <span class="hljs-built_in">console</span>.log p, <span class="hljs-literal">null</span>
+  <span class="hljs-keyword">else</span>
+   <span class="hljs-built_in">console</span>.log p, (people.get <span class="hljs-string">"<span class="hljs-subst">#{p}</span>"</span>, instance).getAddress()</code></pre></div>
+     </div>
+     <div class="wallapatta-sidebar three columns ">
+      <div id="wallapatta_5" class="sidenote"><div id="wallapatta_6" class="section"><div class="content"><p id="wallapatta_7" class="paragraph"><a id="wallapatta_113" class="link" href="http://coffeescript.org/">"CoffeeScript is a little language that compiles into JavaScript."</a></p></div></div></div><div id="wallapatta_12" class="sidenote"><div id="wallapatta_13" class="section"><div class="content"><p id="wallapatta_14" class="paragraph"><span id="wallapatta_117" class="text">You can get LDS from here: </span><a id="wallapatta_118" class="link" href="https://github.com/chethiya/lds">https://github.com/chethiya/lds</a></p></div></div></div><div id="wallapatta_17" class="sidenote"><div id="wallapatta_18" class="section"><div class="content"><p id="wallapatta_19" class="paragraph"><span id="wallapatta_123" class="text">At the moment LDS only supports String keys</span></p></div></div></div><div id="wallapatta_40" class="sidenote"><div id="wallapatta_41" class="section"><div class="content"><p id="wallapatta_42" class="paragraph"><span id="wallapatta_131" class="text">LDS has it's own implementation of String. It uses 2-byte fixed with character encoding so that there is always one-to-one transformation between JS native String and LDS.String</span></p></div></div></div><div id="wallapatta_56" class="sidenote"><div id="wallapatta_57" class="section"><div class="content"><p id="wallapatta_58" class="paragraph"><span id="wallapatta_137" class="text">Only firs 3 values of </span><code id="wallapatta_138" class="code"><span id="wallapatta_139" class="text">values</span></code><span id="wallapatta_140" class="text"> will be set</span></p></div></div></div><div id="wallapatta_60" class="sidenote"><div id="wallapatta_61" class="section"><div class="content"><p id="wallapatta_62" class="paragraph"><span id="wallapatta_141" class="text">4th element in </span><code id="wallapatta_142" class="code"><span id="wallapatta_143" class="text">address</span></code><span id="wallapatta_144" class="text"> array is changed to a new value </span><code id="wallapatta_145" class="code"><span id="wallapatta_146" class="text">index-3-new</span></code></p></div></div></div><div id="wallapatta_64" class="sidenote"><div id="wallapatta_65" class="section"><div class="content"><p id="wallapatta_66" class="paragraph"><span id="wallapatta_147" class="text">Sets the 5th element of </span><code id="wallapatta_148" class="code"><span id="wallapatta_149" class="text">address</span></code><span id="wallapatta_150" class="text"> to LDS.string </span><code id="wallapatta_151" class="code"><span id="wallapatta_152" class="text">str</span></code></p></div></div></div><div id="wallapatta_73" class="sidenote"><div id="wallapatta_74" class="section"><div class="content"><p id="wallapatta_75" class="paragraph"><span id="wallapatta_164" class="text">LDS.StructClass.get() method returns a JSON object of the struct instance.</span></p></div></div></div><div id="wallapatta_77" class="sidenote"><div id="wallapatta_78" class="section"><div class="content"><p id="wallapatta_79" class="paragraph"><span id="wallapatta_165" class="text">If a property in a Struct is an array, then the 1st argument of getters will be  the index of the respective array.</span></p></div></div></div><div id="wallapatta_81" class="sidenote"><div id="wallapatta_82" class="section"><div class="content"><p id="wallapatta_83" class="paragraph"><span id="wallapatta_166" class="text">2nd argument of getters is the </span><code id="wallapatta_167" class="code"><span id="wallapatta_168" class="text">`string_flag</span></code><span id="wallapatta_169" class="text">` that indicates the return value is a LDS.String object. You'll have to </span><code id="wallapatta_170" class="code"><span id="wallapatta_171" class="text">release()</span></code><span id="wallapatta_172" class="text"> those objects after consuming.</span></p></div></div></div><div id="wallapatta_100" class="sidenote"><div id="wallapatta_101" class="section"><div class="content"><p id="wallapatta_102" class="paragraph"><span id="wallapatta_196" class="text">An object of the struct is passed in to </span><code id="wallapatta_197" class="code"><span id="wallapatta_198" class="text">add()</span></code><span id="wallapatta_199" class="text"> and </span><code id="wallapatta_200" class="code"><span id="wallapatta_201" class="text">get()</span></code><span id="wallapatta_202" class="text"> methods so that those methods can resume passed in </span><code id="wallapatta_203" class="code"><span id="wallapatta_204" class="text">Object</span></code><span id="wallapatta_205" class="text"> rather than creating new one. If such an object is not passed in as an argument the methods will create a new </span><code id="wallapatta_206" class="code"><span id="wallapatta_207" class="text">Object</span></code><span id="wallapatta_208" class="text">.</span></p></div></div></div><div id="wallapatta_108" class="sidenote"><div id="wallapatta_109" class="section"><div class="content"><p id="wallapatta_110" class="paragraph"><code id="wallapatta_217" class="code"><span id="wallapatta_218" class="text">get(key)</span></code><span id="wallapatta_219" class="text"> method returns LDS.Struct instance of the given </span><code id="wallapatta_220" class="code"><span id="wallapatta_221" class="text">key</span></code><span id="wallapatta_222" class="text">. If </span><code id="wallapatta_223" class="code"><span id="wallapatta_224" class="text">key</span></code><span id="wallapatta_225" class="text"> doesn't exists in the hash table, it creates a new key-value pair and returns the created instance.</span></p></div></div></div>
+     </div>
+     <div style="display:none;">
+      <div class='wallapatta-code'>### The Problem
+
+ I use CoffeeScript (Node.js) extensively to analyze large data sets. Time to time I run out of available memory provided by v8 for JS Objects and Arrays.
+ >>>
+  <<http://coffeescript.org/("CoffeeScript is a little language that compiles into JavaScript.")>>
+ Even in 64-bit Node.js (as of version 0.12) there is ~1.5GB memory limit. But this memory limit does not apply for Types Arrays. I don't believe this is case where we need to look for another resort like C, specially given the flexibility offered by JavaScript.
+
+### What is LDS
+
+ <<https://github.com/chethiya/lds(LDS)>> (Large Data Structures) is a library that implements some of basic data structure based on JavaScript Typed Arrays to overcome this memory limit issue.
+ >>>
+  You can get LDS from here:
+  <<https://github.com/chethiya/lds>>
+
+ It's still not fine tuned to gain the best performance but very much usable. There can be considerable performance hit in when it comes to strings since the lack of support from JS API to convert between JS String and Buffers
+
+ Here's how to use LDS to implement ``<string,number>`` map in Coffescript.
+
+ >>>
+  At the moment LDS only supports String keys
+
+ ```coffeescript
+  LDS = require 'lds'
+  n = 10000000
+  map = LDS.HashtableBase n, LDS.Types.Int32
+  for i in [0...n]
+   map.set "#{i}", i
+  for i in [0..10]
+   console.log "#{i} -> #{map.get "#{i}"}"
+
+### How to get it
+ #### Node.js
+  ```
+   npm install lds
+
+  And require it as follows
+
+  ```javascript
+   LDS = require('lds')
+
+ #### Browser
+  ```html
+   <script src="https://github.com/chethiya/lds/blob/master/build/lds.js"></script>
+
+  And consume it as follows
+
+  ```javascript
+   LDS = window.LDS
+
+###Struct
+
+ To represent related values, LDS has an implementation of Struct. A struct definition contains a list of root level property names and the types. Supported types are:
+
+ ```
+  UInt8
+  UInt32
+  UInt16
+  Float32
+  Float64
+  String
+
+ >>>
+  LDS has it's own implementation of String. It uses 2-byte fixed with character encoding so that there is always one-to-one transformation between JS native String and LDS.String
+
+ Here's an example definition of Struct
+
+ ```coffeescript
+  Person = LDS.Struct "Person",
+   {property: 'name', type: LDS.Types.String, length: 1}
+   {property: 'age', type: LDS.Types.Int16}
+   {property: 'values', type: LDS.Types.Int32, length: 5}
+   {property: 'address', type: LDS.Types.String, length: 5}
+
+ * property 'name' is a String
+ * property 'age' is a 16-bit integer
+ * property 'values' is a fixed-length array of 32-bit integer
+ * property 'address' is a fixed-length array of Strings
+
+ ```coffeescript
+  p = new Person
+  p.setName 'Bob'
+  p.setAge 23
+  p.setValues [1, 2, 3]
+
+ >>>
+  Only firs 3 values of ``values`` will be set
+
+
+ ```coffeescript
+  p.setAddress ["No. 123", "Street 1", "Street 2", ""]
+  p.setAddress "index-3-new", 3
+
+ >>>
+  4th element in ``address`` array is changed to a new value ``index-3-new``
+
+ ```coffeescript
+  str = new LDS.String "4-fourth"
+  p.setAddress str, 4, on
+
+ >>>
+  Sets the 5th element of ``address`` to LDS.string ``str``
+
+ Can set LDS.String values instead of JS native Strings by setting the 3rd argument ``true`` in all setter functions
+
+
+ ```coffeescript
+  str.release()
+
+
+ If you are to create LDS.String, you must release those string objects by calling ``release()`` method. In most cases you will not create LDS.Strings. But you might create Hashtables and ArrayLists having LDS.Strings in their Structs. In such cases you'll have to call ``release()`` method of those objects once you are done working with that data structure.
+
+
+ ```coffeescript
+  console.log p.get()
+
+ >>>
+  LDS.StructClass.get() method returns a JSON object of the struct instance.
+
+ ```coffeescript
+  console.log p.getAddress 2
+
+ >>>
+  If a property in a Struct is an array, then the 1st argument of getters will be  the index of the respective array.
+
+ ```coffeescript
+  str = p.getAddress 0, on
+
+  console.log str.toString()
+  str.release()
+
+  p2 = new Person
+  p2.copyFrom p
+  console.log p2.get()
+
+ >>>
+  2nd argument of getters is the ```string_flag``` that indicates the return value is a LDS.String object. You'll have to ``release()`` those objects after consuming.
+
+ ``Struct.copyFrom()`` method copies the content from source struct buffer area to target struct buffer area. LDS.Strings are copied by reference.
+
+  * Reference counts to existing strings in source are decremented by 1.
+
+  * Reference counts to strings in target are incremented by 1.
+
+
+###Array List
+
+ There is an implementation of LDS.Array. But LDS.Array hits a 32-bit limitation as size in ``new ArrayBuffer size`` has to be somewhere around ``2^30`` at max. Therefore LDS.Array has a maximum size limit of ``2^29 / (#bytes_per_strcut)``
+
+ ArrayList is build on top of LDS.Array and it is a list of LDS.Arrays. Therefore it has a size limit much greater than ``2^32``.
+
+ Here's hoe to make a large LDS.ArrayList using the ``sturct Person``.
+
+ ```coffeescript
+  testArratList = (n) ->
+   arr = new Array 5
+   people = new LDS.ArrayList Person
+   instanece = null
+   for i in [0...n]
+    instance = people.add instance # same as people.add()
+    instance.copyFrom p2
+    instance.setName "#{i}"
+
+    for j in [0...5]
+     arr[j] = "#{i}-#{j}" # or instance.setAddress "#{i}-#{j}", j
+    instance.setAddress arr
+   console.log 'Done pushing elements'
+   console.log 'Reading from ArrayList'
+   for i in [0...10]
+    p = (Math.floor Math.random()*n) % n
+    #following is equal to (people.get p).getAddress()
+    console.log p, (people.get p, instance).getAddress()
+
+ >>>
+  An object of the struct is passed in to ``add()`` and ``get()`` methods so that those methods can resume passed in ``Object`` rather than creating new one. If such an object is not passed in as an argument the methods will create a new ``Object``.
+
+###Hash Table
+
+LDS.HastableBase is a ``<string,number>`` implementation. LDS.Hashtable is a more generic ``<string,LDS.Struct>`` hashtable that is based on LDS.HashtableBase.
+
+```coffeescript
+ testHashtable = (n) ->
+  console.time 'time_hashtable'
+  arr = new Array 5
+  people = LDS.Hashtable n, Person #creates a hashtable of size n
+  instance = null
+  for i in [0...n]
+   instance = people.get "#{i}", instance #gets the value in key #{i}
+   instance.copyFrom p2
+
+   for j in [0...5]
+    instance.setAddress "#{i}-#{j}", j
+  console.timeEnd 'time_hashtable'
+  console.log 'Done populating the hastable'
+  console.log 'Reading from hashtable'
+
+  for i in [0...20]
+   p = (Math.floor Math.random()*n*2) % (2*n)
+   if not people.check "#{p}" #checks whether key exists
+    console.log p, null
+   else
+    console.log p, (people.get "#{p}", instance).getAddress()
+
+>>>
+ ``get(key)`` method returns LDS.Struct instance of the given ``key``. If ``key`` doesn't exists in the hash table, it creates a new key-value pair and returns the created instance.
+
+</div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script src="lib/highlightjs/highlight.pack.js">
+  </script>
+  <script src="lib/weya/weya.js">
+  </script>
+  <script src="lib/weya/base.js">
+  </script>
+  <script src="lib/mod/mod.js">
+  </script>
+  <script src="js/static.js?v=9">
+  </script>
+  <script src="js/parser.js?v=9">
+  </script>
+  <script src="js/reader.js?v=9">
+  </script>
+  <script src="js/nodes.js?v=9">
+  </script>
+  <script src="js/render.js?v=9">
+  </script>
+ </body>
+</html>
