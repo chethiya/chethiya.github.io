@@ -2,8 +2,8 @@
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  Mod.require('Weya.Base', 'Weya', 'HLJS', function(Base, Weya, HLJS) {
-    var Article, Block, Bold, Code, CodeBlock, Html, Italics, Link, List, ListItem, Map, Media, MediaInline, Node, PREFIX, Section, Sidenote, Special, SubScript, SuperScript, TYPES, Table, Text, decodeURL;
+  Mod.require('Weya.Base', 'Weya', 'HLJS', 'CoffeeScript', function(Base, Weya, HLJS, CoffeeScript) {
+    var Article, Block, Bold, Code, CodeBlock, FormattedCode, Full, Html, HtmlInline, Italics, Link, List, ListItem, Map, Media, MediaInline, Node, PREFIX, Section, Sidenote, Special, SubScript, SuperScript, TYPES, Table, Text, decodeURL;
     decodeURL = function(url) {
       if ((typeof window !== "undefined" && window !== null ? window.wallapattaDecodeURL : void 0) != null) {
         return window.wallapattaDecodeURL(url);
@@ -15,7 +15,9 @@
       article: 'article',
       sidenote: 'sidenote',
       codeBlock: 'codeBlock',
+      formattedCode: 'formattedCode',
       special: 'special',
+      full: 'full',
       html: 'html',
       table: 'table',
       section: 'section',
@@ -30,6 +32,7 @@
       subScript: 'subScript',
       code: 'code',
       link: 'link',
+      htmlInline: 'htmlInline',
       mediaInline: 'mediaInline',
       comment: '///'
     };
@@ -48,7 +51,8 @@
           this.id = options.id;
         }
         this.start = this.id;
-        return this.N = 0;
+        this.N = 0;
+        return this.lineNumbers = {};
       });
 
       Map.prototype.smallElements = function() {
@@ -59,6 +63,31 @@
         node.id = this.id;
         this.nodes[this.id] = node;
         return this.id++;
+      };
+
+      Map.prototype.mapLineNumbers = function() {
+        var base, id, ln, max, node, ref, results;
+        this.lineNumbers = {};
+        max = 0;
+        ref = this.nodes;
+        for (id in ref) {
+          node = ref[id];
+          ln = node.lineNumber;
+          if (ln == null) {
+            continue;
+          }
+          this.lineNumbers[ln] = id;
+          max = Math.max(max, parseInt(ln));
+        }
+        ln = 1;
+        results = [];
+        while (ln <= max) {
+          if ((base = this.lineNumbers)[ln] == null) {
+            base[ln] = this.lineNumbers[ln - 1];
+          }
+          results.push(++ln);
+        }
+        return results;
       };
 
       return Map;
@@ -98,6 +127,22 @@
         } else {
           return false;
         }
+      };
+
+      Node.prototype.getChildPosition = function(node) {
+        var child, i, k, len, n, ref;
+        if (this.children.length === 0) {
+          return 1;
+        }
+        n = this.children.length;
+        ref = this.children;
+        for (i = k = 0, len = ref.length; k < len; i = ++k) {
+          child = ref[i];
+          if (child.id === node.id) {
+            n = i;
+          }
+        }
+        return n / this.children.length;
       };
 
       Node.prototype._add = function(node) {
@@ -344,6 +389,35 @@
       return Block;
 
     })(Node);
+    FormattedCode = (function(superClass) {
+      extend(FormattedCode, superClass);
+
+      function FormattedCode() {
+        return FormattedCode.__super__.constructor.apply(this, arguments);
+      }
+
+      FormattedCode.extend();
+
+      FormattedCode.prototype.type = TYPES.formattedCode;
+
+      FormattedCode.initialize(function(options) {
+        return this.text = '';
+      });
+
+      FormattedCode.prototype.addText = function(text) {
+        if (this.text !== '') {
+          this.text += '\n';
+        }
+        return this.text += text;
+      };
+
+      FormattedCode.prototype.template = function() {
+        return this.$.elem = this.pre("#" + PREFIX + this.$.id + ".formattedCode", null);
+      };
+
+      return FormattedCode;
+
+    })(Node);
     CodeBlock = (function(superClass) {
       extend(CodeBlock, superClass);
 
@@ -432,12 +506,23 @@
             }
             continue;
           }
-          node = new Block({
-            map: options.map,
-            indentation: this.indentation
-          });
-          node.setParent(this);
-          node.addText(cell.trim());
+          if ((cell.substr(0, 2)) === '!!') {
+            node = new Media({
+              map: options.map,
+              indentation: this.indentation,
+              media: {
+                src: cell.substr(2)
+              }
+            });
+            node.setParent(this);
+          } else {
+            node = new Block({
+              map: options.map,
+              indentation: this.indentation
+            });
+            node.setParent(this);
+            node.addText(cell.trim());
+          }
           row.push({
             span: 1,
             node: node
@@ -464,10 +549,10 @@
                 row = this.$.table[i];
                 cells = [];
                 this.tr(function() {
-                  var cell, l, len, results1;
+                  var cell, len, m, results1;
                   results1 = [];
-                  for (l = 0, len = row.length; l < len; l++) {
-                    cell = row[l];
+                  for (m = 0, len = row.length; m < len; m++) {
+                    cell = row[m];
                     results1.push(cells.push(this.th({
                       colspan: cell.span
                     })));
@@ -485,10 +570,10 @@
                 row = this.$.table[i];
                 cells = [];
                 this.tr(function() {
-                  var cell, l, len, results1;
+                  var cell, len, m, results1;
                   results1 = [];
-                  for (l = 0, len = row.length; l < len; l++) {
-                    cell = row[l];
+                  for (m = 0, len = row.length; m < len; m++) {
+                    cell = row[m];
                     results1.push(cells.push(this.td({
                       colspan: cell.span
                     })));
@@ -505,9 +590,9 @@
         for (i = k = 0, len = elems.length; k < len; i = ++k) {
           row = elems[i];
           results.push((function() {
-            var l, len1, results1;
+            var len1, m, results1;
             results1 = [];
-            for (j = l = 0, len1 = row.length; l < len1; j = ++l) {
+            for (j = m = 0, len1 = row.length; m < len1; j = ++m) {
               cell = row[j];
               results1.push(this.table[i][j].node.render({
                 elem: cell
@@ -540,6 +625,24 @@
       return Special;
 
     })(Node);
+    Full = (function(superClass) {
+      extend(Full, superClass);
+
+      function Full() {
+        return Full.__super__.constructor.apply(this, arguments);
+      }
+
+      Full.extend();
+
+      Full.prototype.type = TYPES.full;
+
+      Full.prototype.template = function() {
+        return this.$.elem = this.div("#" + PREFIX + this.$.id + ".full", null);
+      };
+
+      return Full;
+
+    })(Node);
     Html = (function(superClass) {
       extend(Html, superClass);
 
@@ -551,8 +654,9 @@
 
       Html.prototype.type = TYPES.html;
 
-      Html.initialize(function() {
-        return this.text = '';
+      Html.initialize(function(options) {
+        this.text = '';
+        return this.lang = options.lang.trim();
       });
 
       Html.prototype.addText = function(text) {
@@ -563,16 +667,87 @@
       };
 
       Html.prototype.render = function(options) {
+        var c, e, error, error1, error2, f, k, l, len, lines, s, w;
+        if (this.lang === 'js') {
+          try {
+            f = new Function("return (" + this.text + ")");
+            s = f();
+          } catch (error) {
+            e = error;
+            s = e.message;
+          }
+        } else if (this.lang === 'coffee') {
+          try {
+            c = CoffeeScript.compile("return (" + this.text + ")");
+            f = new Function("return " + c);
+            s = f();
+          } catch (error1) {
+            e = error1;
+            s = e.message;
+          }
+        } else if (this.lang === 'weya') {
+          try {
+            w = "Weya.markup {}, ->\n";
+            lines = this.text.split('\n');
+            for (k = 0, len = lines.length; k < len; k++) {
+              l = lines[k];
+              w += " " + l + "\n";
+            }
+            c = CoffeeScript.compile("return (" + w + ")");
+            f = new Function("return " + c);
+            s = f();
+          } catch (error2) {
+            e = error2;
+            s = e.message;
+          }
+        } else {
+          s = this.text;
+        }
         Weya({
           elem: options.elem,
           context: this
         }, function() {
           return this.$.elem = this.div("#" + PREFIX + this.$.id + ".html", null);
         });
-        return this.elem.innerHTML = this.text;
+        return this.elem.innerHTML = s;
       };
 
       return Html;
+
+    })(Node);
+    HtmlInline = (function(superClass) {
+      extend(HtmlInline, superClass);
+
+      function HtmlInline() {
+        return HtmlInline.__super__.constructor.apply(this, arguments);
+      }
+
+      HtmlInline.extend();
+
+      HtmlInline.prototype.type = TYPES.htmlInline;
+
+      HtmlInline.initialize(function() {
+        return this.text = '';
+      });
+
+      HtmlInline.prototype.addText = function(text) {
+        if (this.text !== '') {
+          this.text += '\n';
+        }
+        return this.text += text;
+      };
+
+      HtmlInline.prototype.render = function(options) {
+        Weya({
+          elem: options.elem,
+          context: this
+        }, function() {
+          return this.$.elem = this.span("#" + PREFIX + this.$.id + ".html", null);
+        });
+        return this.elem.innerHTML = this.text;
+      };
+
+      return HtmlInline;
 
     })(Node);
     Article = (function(superClass) {
@@ -617,6 +792,24 @@
         });
         this.heading.setParent(this);
         return this.heading.addText(options.text);
+      };
+
+      Section.prototype.isFirstChild = function(node) {
+        if ((Node.prototype.isFirstChild.call(this, node)) === true) {
+          return true;
+        } else if ((this.heading != null) && node.id === this.heading.id) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      Section.prototype.getChildPosition = function(node) {
+        if ((this.heading != null) && node.id === this.heading.id) {
+          return 0;
+        } else {
+          return Node.prototype.getChildPosition.call(this, node);
+        }
       };
 
       Section.prototype.template = function() {
@@ -753,31 +946,37 @@
       Media.extend();
 
       Media.initialize(function(options) {
+        var ref;
         this.src = options.media.src;
         this.alt = options.media.alt;
-        return this.alt != null ? this.alt : this.alt = options.media.src;
+        if (this.alt == null) {
+          this.alt = options.media.src;
+        }
+        this.width = options.media.width;
+        return this.float = (ref = options.media.float) != null ? ref : '';
       });
 
       Media.prototype.type = TYPES.media;
 
-      Media.prototype.add = function(node) {
-        throw new Error('Invalid indentation');
-      };
-
       Media.prototype.template = function() {
-        return this.$.elem = this.div("#" + PREFIX + this.$.id + ".image-container", function() {
-          return this.$.elems.img = this.img(".image", {
+        var id;
+        id = "#" + PREFIX + this.$.id + ".image-container";
+        switch (this.$.float) {
+          case '<':
+            id += '.wrap-image-left';
+            break;
+          case '>':
+            id += '.wrap-image-right';
+        }
+        return this.$.elem = this.div(id, function() {
+          this.$.elems.img = this.img(".image", {
             src: decodeURL(this.$.src),
             alt: this.$.alt
           });
+          if (this.$.width != null) {
+            return this.$.elems.img.style.maxWidth = this.$.width + "%";
+          }
         });
-      };
-
-      Media.prototype.render = function(options) {
-        return Weya({
-          elem: options.elem,
-          context: this
-        }, this.template);
       };
 
       return Media;
@@ -799,9 +998,12 @@
     Mod.set('Wallapatta.Article', Article);
     Mod.set('Wallapatta.Media', Media);
     Mod.set('Wallapatta.CodeBlock', CodeBlock);
+    Mod.set('Wallapatta.FormattedCode', FormattedCode);
     Mod.set('Wallapatta.Table', Table);
     Mod.set('Wallapatta.Special', Special);
     Mod.set('Wallapatta.Html', Html);
+    Mod.set('Wallapatta.Full', Full);
+    Mod.set('Wallapatta.HtmlInline', HtmlInline);
     Mod.set('Wallapatta.Map', Map);
     return Mod.set('Wallapatta.TYPES', TYPES);
   });

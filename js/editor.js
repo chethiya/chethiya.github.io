@@ -3,7 +3,7 @@
     hasProp = {}.hasOwnProperty;
 
   Mod.require('Weya.Base', 'CodeMirror', 'Wallapatta.Parser', 'Wallapatta.Sample', 'HLJS', function(Base, CodeMirror, Parser, Sample, HLJS) {
-    var EDITOR, Editor;
+    var Editor;
     Editor = (function(superClass) {
       extend(Editor, superClass);
 
@@ -25,7 +25,7 @@
                     }
                   });
                 });
-                return this.div(function() {
+                this.div(function() {
                   this.i(".fa.fa-header", {
                     on: {
                       click: this.$.on.header
@@ -91,11 +91,21 @@
                       click: this.$.on.outdent
                     }
                   });
-                  return this.i(".fa.fa-columns", {
+                  this.i(".fa.fa-columns", {
                     on: {
                       click: this.$.on.sidenote
                     }
                   });
+                  return this.i(".fa.fa-check", {
+                    on: {
+                      click: this.$.on.checkSpelling
+                    }
+                  });
+                });
+                return this.$.elems.pickMediaDialog = this.div(".pick-media-dialog", {
+                  on: {
+                    click: this.$.on.pickMediaClick
+                  }
                 });
               });
               return this.$.elems.textarea = this.textarea(".editor", {
@@ -106,8 +116,18 @@
             return this.$.elems.preview = this.div(".preview.seven.columns", function() {
               this.$.elems.errors = this.div(".row.error", null);
               return this.div(".row.wallapatta", function() {
-                this.$.elems.previewMain = this.div(".nine.columns", null);
-                return this.$.elems.previewSidebar = this.div(".three.columns", null);
+                this.$.elems.previewMain = this.div(".nine.columns", {
+                  on: {
+                    click: this.$.on.previewClick,
+                    dblclick: this.$.on.previewDbClick
+                  }
+                });
+                return this.$.elems.previewSidebar = this.div(".three.columns", {
+                  on: {
+                    click: this.$.on.previewClick,
+                    dblclick: this.$.on.previewDbClick
+                  }
+                });
               });
             });
           });
@@ -139,7 +159,7 @@
                   type: "number",
                   value: "225"
                 });
-                return this.button(".button-primary", "Render", {
+                return this.button(".button-primary", "Print", {
                   on: {
                     click: this.$.on.renderPrint
                   }
@@ -156,14 +176,67 @@
         });
       };
 
-      Editor.initialize(function() {
+      Editor.initialize(function(options) {
+        var ref, ref1;
+        this.openUrl = (ref = options.openUrl) != null ? ref : (function() {});
+        this.onChangeListener = (ref1 = options.onChanged) != null ? ref1 : (function() {});
         this.elems = {};
         return this._isPrint = false;
       });
 
+      Editor.listen('previewClick', function(e) {
+        var n, node, results;
+        if (this.renderer == null) {
+          return;
+        }
+        node = e.target;
+        results = [];
+        while ((node != null) && node !== document.body) {
+          n = this.renderer.getNodeFromElem(node);
+          if ((n != null) && n.lineNumber) {
+            this.editor.setCursor({
+              line: n.lineNumber
+            });
+            break;
+          }
+          results.push(node = node.parentNode);
+        }
+        return results;
+      });
+
+      Editor.listen('previewDbClick', function(e) {
+        var href, node, results;
+        e.preventDefault();
+        node = e.target;
+        results = [];
+        while ((node != null) && node !== document.body) {
+          href = node.getAttribute('href');
+          if (href != null) {
+            this.openUrl(href);
+            break;
+          }
+          results.push(node = node.parentNode);
+        }
+        return results;
+      });
+
+      Editor.listen('gutterClick', function(cm, line, where, e) {
+        var elem, node, top;
+        node = this.renderer.getNodeFromLine(line);
+        if (node == null) {
+          return;
+        }
+        elem = node.elem;
+        if (elem == null) {
+          return;
+        }
+        top = this.renderer.getOffsetTop(elem, this.elems.preview);
+        return this.elems.preview.scrollTop = top;
+      });
+
       Editor.listen('change', function() {
         this.preview();
-        return typeof this.onChangeListener === "function" ? this.onChangeListener() : void 0;
+        return this.onChangeListener();
       });
 
       Editor.listen('parse', function(e) {
@@ -210,7 +283,7 @@
       });
 
       Editor.listen('inlineMedia', function() {
-        return this.wrapSelection('[[', ']]');
+        return this.pickMediaDialog();
       });
 
       Editor.listen('superscript', function() {
@@ -292,6 +365,10 @@
         return this.editor.focus();
       });
 
+      Editor.listen('checkSpelling', function() {
+        return window.CHECK_SPELLING = !window.CHECK_SPELLING;
+      });
+
       Editor.listen('print', function() {
         this.elems.editorContainer.classList.add('wallapatta-editor-print');
         this.elems.printContainer.style.display = 'block';
@@ -299,7 +376,7 @@
       });
 
       Editor.listen('renderPrint', function(e) {
-        var HEIGHT, WIDTH, parser, render, text;
+        var HEIGHT, WIDTH, error, render, text;
         e.preventDefault();
         WIDTH = parseInt(this.elems.widthInput.value);
         if (isNaN(WIDTH)) {
@@ -312,18 +389,18 @@
         text = this.editor.getValue();
         this.elems.printMain.innerHTML = '';
         this.elems.printSidebar.innerHTML = '';
-        parser = new Parser({
+        this.parser = new Parser({
           text: text
         });
         try {
-          parser.parse();
-        } catch (_error) {
-          e = _error;
+          this.parser.parse();
+        } catch (error) {
+          e = error;
           this.elems.errors.textContent = e.message;
           return;
         }
         this.elems.errors.textContent = '';
-        render = parser.getRender();
+        render = this.renderer = this.parser.getRender();
         render.render(this.elems.printMain, this.elems.printSidebar);
         this.elems.printContainer.style.width = WIDTH + "mm";
         return window.requestAnimationFrame((function(_this) {
@@ -334,7 +411,10 @@
             height = ratio * HEIGHT;
             return render.mediaLoaded(function() {
               return setTimeout(function() {
-                return render.setPages(height);
+                render.setPages(height, width);
+                return window.requestAnimationFrame(function() {
+                  return window.print();
+                });
               }, 500);
             });
           };
@@ -356,22 +436,22 @@
       };
 
       Editor.prototype.preview = function() {
-        var e, parser, render, text;
+        var e, error, render, text;
         text = this.editor.getValue();
         this.elems.previewMain.innerHTML = '';
         this.elems.previewSidebar.innerHTML = '';
-        parser = new Parser({
+        this.parser = new Parser({
           text: text
         });
         try {
-          parser.parse();
-        } catch (_error) {
-          e = _error;
+          this.parser.parse();
+        } catch (error) {
+          e = error;
           this.elems.errors.textContent = e.message;
           return;
         }
         this.elems.errors.textContent = '';
-        render = parser.getRender();
+        render = this.renderer = this.parser.getRender();
         render.render(this.elems.previewMain, this.elems.previewSidebar);
         return window.requestAnimationFrame(function() {
           return render.mediaLoaded(function() {
@@ -389,17 +469,28 @@
           tabSize: 1,
           indentUnit: 1,
           foldGutter: true,
+          styleActiveLine: true,
           gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
         });
         this.editor.on('change', this.on.change);
         height = window.innerHeight;
-        console.log(height);
         this.editor.setSize(null, (height - 100) + "px");
         this.elems.preview.style.maxHeight = (height - 50) + "px";
-        return this.editor.setValue(Sample);
+        this.editor.setValue(Sample);
+        this.editor.on('gutterClick', this.on.gutterClick);
+        window.addEventListener('resize', this.on.resize);
+        return window.requestAnimationFrame(this._onRendered);
       });
 
-      Editor.prototype.render = function() {
+      Editor.listen('resize', function() {
+        var height;
+        height = window.innerHeight;
+        this.editor.setSize(null, (height - 100) + "px");
+        return this.elems.preview.style.maxHeight = (height - 50) + "px";
+      });
+
+      Editor.prototype.render = function(callback) {
+        this._onRendered = callback;
         this.elems.container = document.body;
         Weya({
           elem: this.elems.container,
@@ -408,12 +499,56 @@
         return window.requestAnimationFrame(this.on.setupEditor);
       };
 
+      Editor.prototype.setResources = function(resources) {
+        return this._resources = resources;
+      };
+
+      Editor.listen('pickMediaClick', function(e) {
+        var n, path;
+        this.elems.pickMediaDialog.style.display = 'none';
+        n = e.target;
+        path = null;
+        while (n) {
+          if (n._path != null) {
+            path = n._path;
+            break;
+          }
+          n = e.parentNode;
+        }
+        if (path == null) {
+          return this.wrapSelection('[[', ']]');
+        }
+        return this.wrapSelection("[[" + path + "]]", '');
+      });
+
+      Editor.prototype.pickMediaDialog = function() {
+        var resources, s;
+        s = this.editor.getSelection();
+        if (s.trim() !== '') {
+          return this.wrapSelection('[[', ']]');
+        }
+        this.elems.pickMediaDialog.style.display = 'block';
+        this.elems.pickMediaDialog.innerHTML = '';
+        resources = this._resources;
+        return Weya({
+          elem: this.elems.pickMediaDialog
+        }, function() {
+          var d, j, len, path, results;
+          this.div('Blank');
+          results = [];
+          for (j = 0, len = resources.length; j < len; j++) {
+            path = resources[j];
+            d = this.div(path);
+            results.push(d._path = path);
+          }
+          return results;
+        });
+      };
+
       return Editor;
 
     })(Base);
-    EDITOR = new Editor;
-    EDITOR.render();
-    return Mod.set('Editor', EDITOR);
+    return Mod.set('Editor', Editor);
   });
 
 }).call(this);

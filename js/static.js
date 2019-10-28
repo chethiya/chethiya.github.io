@@ -1,13 +1,6 @@
 (function() {
   Mod.require('Wallapatta.Parser', function(Parser) {
-    var PAGE_HEIGHT, PAGE_WIDTH, PRINT, RATIO, doc, docs, j, len, process, processAll, renderPrint, renderWeb;
-    RATIO = 0;
-    PAGE_HEIGHT = PAGE_WIDTH = 0;
-    if ((window.location.href.indexOf('print')) !== -1) {
-      PRINT = true;
-    } else {
-      PRINT = false;
-    }
+    var process, processAll, renderWeb;
     renderWeb = function(render) {
       var _count, _imagesLoaded, _interval, _render;
       _imagesLoaded = false;
@@ -27,13 +20,6 @@
         return _render();
       });
       return _interval = setInterval(_render, 1000);
-    };
-    renderPrint = function(render) {
-      return render.mediaLoaded(function() {
-        return setTimeout(function() {
-          return render.setPages(PAGE_HEIGHT);
-        }, 5000);
-      });
     };
     process = function(n, doc) {
       var code, main, parser, render, sidebar;
@@ -63,11 +49,7 @@
         sidebar: sidebar
       });
       return window.requestAnimationFrame(function() {
-        if (PRINT) {
-          return renderPrint(render);
-        } else {
-          return renderWeb(render);
-        }
+        return renderWeb(render);
       });
     };
     processAll = function() {
@@ -80,27 +62,14 @@
       }
       return results;
     };
-    if (PRINT) {
-      docs = document.getElementsByClassName('wallapatta-container');
-      for (j = 0, len = docs.length; j < len; j++) {
-        doc = docs[j];
-        doc.classList.add('wallapatta-print');
-      }
-      return window.requestAnimationFrame(function() {
-        RATIO = docs[0].offsetWidth / 170;
-        PAGE_WIDTH = RATIO * 170;
-        PAGE_HEIGHT = RATIO * 225;
-        return processAll();
-      });
-    } else {
-      return processAll();
-    }
+    return processAll();
   });
 
   document.addEventListener('DOMContentLoaded', function() {
     Mod.set('Weya', Weya);
     Mod.set('Weya.Base', Weya.Base);
     Mod.set('HLJS', hljs);
+    Mod.set('CoffeeScript', 'CoffeeScript');
     return Mod.initialize();
   });
 

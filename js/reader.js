@@ -7,8 +7,10 @@
     BLOCK_TOKENS = {
       sidenote: '>>>',
       code: '```',
+      formattedCode: '<<<wallapatta',
       special: '+++',
       html: '<<<',
+      full: '<!>',
       table: '|||',
       heading: '#',
       orderedList: '- ',
@@ -96,11 +98,17 @@
           case BLOCK_TOKENS.code:
             line.type = TYPES.codeBlock;
             break;
+          case BLOCK_TOKENS.formattedCode:
+            line.type = TYPES.formattedCode;
+            break;
           case BLOCK_TOKENS.table:
             line.type = TYPES.table;
             break;
           case BLOCK_TOKENS.special:
             line.type = TYPES.special;
+            break;
+          case BLOCK_TOKENS.full:
+            line.type = TYPES.full;
             break;
           case BLOCK_TOKENS.html:
             line.type = TYPES.html;

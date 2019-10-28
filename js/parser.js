@@ -2,7 +2,7 @@
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  Mod.require('Weya.Base', 'Wallapatta.TYPES', 'Wallapatta.Text', 'Wallapatta.Bold', 'Wallapatta.Italics', 'Wallapatta.SuperScript', 'Wallapatta.SubScript', 'Wallapatta.Code', 'Wallapatta.Link', 'Wallapatta.MediaInline', 'Wallapatta.Block', 'Wallapatta.Section', 'Wallapatta.List', 'Wallapatta.ListItem', 'Wallapatta.Sidenote', 'Wallapatta.Article', 'Wallapatta.Media', 'Wallapatta.CodeBlock', 'Wallapatta.Table', 'Wallapatta.Special', 'Wallapatta.Html', 'Wallapatta.Map', 'Wallapatta.Reader', 'Wallapatta.Render', function(Base, TYPES, Text, Bold, Italics, SuperScript, SubScript, Code, Link, MediaInline, Block, Section, List, ListItem, Sidenote, Article, Media, CodeBlock, Table, Special, Html, Map, Reader, Render) {
+  Mod.require('Weya.Base', 'Wallapatta.TYPES', 'Wallapatta.Text', 'Wallapatta.Bold', 'Wallapatta.Italics', 'Wallapatta.SuperScript', 'Wallapatta.SubScript', 'Wallapatta.Code', 'Wallapatta.Link', 'Wallapatta.MediaInline', 'Wallapatta.Block', 'Wallapatta.Section', 'Wallapatta.List', 'Wallapatta.ListItem', 'Wallapatta.Sidenote', 'Wallapatta.Article', 'Wallapatta.Media', 'Wallapatta.CodeBlock', 'Wallapatta.FormattedCode', 'Wallapatta.Table', 'Wallapatta.Special', 'Wallapatta.Html', 'Wallapatta.Full', 'Wallapatta.HtmlInline', 'Wallapatta.Map', 'Wallapatta.Reader', 'Wallapatta.Render', function(Base, TYPES, Text, Bold, Italics, SuperScript, SubScript, Code, Link, MediaInline, Block, Section, List, ListItem, Sidenote, Article, Media, CodeBlock, FormattedCode, Table, Special, Html, Full, HtmlInline, Map, Reader, Render) {
     var BLOCK_LEVEL, Parser, TOKENS, TOKEN_MATCHES;
     TOKENS = {
       bold: Bold,
@@ -18,6 +18,8 @@
       code: '``',
       linkBegin: '<<',
       linkEnd: '>>',
+      htmlBegin: '<-',
+      htmlEnd: '->',
       mediaBegin: '[[',
       mediaEnd: ']]'
     };
@@ -43,7 +45,8 @@
         this.main = true;
         this.sidenotes = [];
         this.prevNode = null;
-        return this.blocks = [];
+        this.blocks = [];
+        return this.fullNode = false;
       });
 
       Parser.prototype.getRender = function() {
@@ -55,34 +58,39 @@
       };
 
       Parser.prototype.parse = function() {
-        var block, e, j, len, ref, results;
+        var block, e, error, error1, j, len, ref;
+        this._lineNumber = null;
         while (this.reader.has()) {
           try {
             this.processLine();
-          } catch (_error) {
-            e = _error;
+          } catch (error) {
+            e = error;
             throw new Error("Line " + (this.reader.n + 1) + ": " + e.message);
           }
           this.reader.next();
         }
         this.map.smallElements();
+        this._lineNumber = null;
         ref = this.blocks;
-        results = [];
         for (j = 0, len = ref.length; j < len; j++) {
           block = ref[j];
           try {
-            results.push(this.parseText(block.text, block));
-          } catch (_error) {
-            e = _error;
+            this.parseText(block.text, block);
+          } catch (error1) {
+            e = error1;
             throw new Error(e.message + ": \"" + block.text + "\"");
           }
         }
-        return results;
+        return this.map.mapLineNumbers();
       };
 
       Parser.prototype.addNode = function(node) {
+        node.lineNumber = this._lineNumber;
         this.node.add(node);
         if (node.type === TYPES.block) {
+          this.blocks.push(node);
+        }
+        if (node.type === TYPES.formattedCode) {
           this.blocks.push(node);
         }
         return this.prevNode = this.node = node;
@@ -154,6 +162,20 @@
                   this.node = this.node.parent();
                 }
                 break;
+              case 'htmlBegin':
+                add();
+                this.addNode(new HtmlInline({
+                  map: this.map
+                }));
+                break;
+              case 'htmlEnd':
+                if (this.node.type !== TYPES.htmlInline) {
+                  throw new Error('Unexpected inline html terminator');
+                } else {
+                  this.node.addText(text.substr(last, cur - last));
+                  this.node = this.node.parent();
+                }
+                break;
               case 'mediaBegin':
                 add();
                 this.addNode(new MediaInline({
@@ -190,20 +212,27 @@
       };
 
       Parser.prototype.processLine = function() {
-        var id, indent, j, len, line, n, node, nodes;
+        var id, j, len, line, n, node, nodes, ref;
         line = this.reader.get();
+        this._lineNumber = this.reader.n;
         if (line.empty) {
           if (this.node.type === TYPES.block) {
             this.prevNode = this.node;
             this.node = this.node.parent();
           }
-          if (this.node.type === TYPES.codeBlock || this.node.type === TYPES.html) {
+          if ((ref = this.node.type) === TYPES.codeBlock || ref === TYPES.html || ref === TYPES.formattedCode) {
             this.node.addText(line.line.substr(this.node.indentation));
           }
           return;
         }
         while (line.indentation < this.node.indentation) {
           this.prevNode = this.node;
+          if (this.node.type === TYPES.full) {
+            if (!this.fullNode) {
+              throw new Error('Full width node Invalid indentation');
+            }
+            this.fullNode = false;
+          }
           this.node = this.node.parent();
           if (this.node == null) {
             if (this.main) {
@@ -224,6 +253,7 @@
             break;
           case TYPES.codeBlock:
           case TYPES.html:
+          case TYPES.formattedCode:
             this.node.addText(line.line.substr(this.node.indentation));
             return;
           case TYPES.table:
@@ -232,30 +262,54 @@
             });
             for (j = 0, len = nodes.length; j < len; j++) {
               node = nodes[j];
-              this.blocks.push(node);
+              if (node.type === TYPES.block) {
+                this.blocks.push(node);
+              }
             }
             return;
         }
         switch (line.type) {
           case TYPES.table:
-            indent = line.indentation + 1;
             return this.addNode(new Table({
               map: this.map,
               indentation: line.indentation + 1
             }));
           case TYPES.codeBlock:
-            indent = line.indentation + 1;
             return this.addNode(new CodeBlock({
               map: this.map,
               indentation: line.indentation + 1,
               lang: line.text
             }));
-          case TYPES.html:
-            indent = line.indentation + 1;
-            return this.addNode(new Html({
+          case TYPES.formattedCode:
+            return this.addNode(new FormattedCode({
               map: this.map,
               indentation: line.indentation + 1
             }));
+          case TYPES.html:
+            return this.addNode(new Html({
+              map: this.map,
+              indentation: line.indentation + 1,
+              lang: line.text
+            }));
+          case TYPES.full:
+            if (!this.main) {
+              throw new Error('Cannot have a full width inside a sidenote');
+            }
+            if (this.fullNode) {
+              throw new Error('Cannot have a full width inside a full width');
+            }
+            this.fullNode = true;
+            this.addNode(new Full({
+              map: this.map,
+              indentation: line.indentation + 1
+            }));
+            id = this.node.id;
+            n = new Sidenote({
+              map: this.map,
+              indentation: line.indentation + 1,
+              link: id
+            });
+            return this.sidenotes.push(n);
           case TYPES.special:
             return this.addNode(new Special({
               map: this.map,
@@ -298,6 +352,9 @@
           case TYPES.sidenote:
             if (!this.main) {
               throw new Error('Cannot have a sidenote inside a sidenote');
+            }
+            if (this.fullNode) {
+              throw new Error('Cannot have a sidenote inside a full width');
             }
             this.main = false;
             id = this.node.id;
@@ -368,6 +425,14 @@
           return media;
         }
         media.alt = parts[1].trim();
+        if (parts.length <= 2) {
+          return media;
+        }
+        media.width = parts[2].trim();
+        if (parts.length <= 3) {
+          return media;
+        }
+        media.float = parts[3].trim();
         return media;
       };
 
